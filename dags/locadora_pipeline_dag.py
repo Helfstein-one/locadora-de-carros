@@ -10,9 +10,10 @@ sys.path.insert(0, os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
 
 from src.pipeline import LocadoraPipeline
 from src.extractor.csv_extractor import CSVExtractor
-from src.quality.validator import PandasDataQualityValidator
+from src.quality.validator import PySparkDataQualityValidator
 from src.transformer.business_transformer import BusinessTransformer
-from src.loader.csv_loader import CSVLoader
+from src.loader.csv_loader import SparkCSVLoader
+from pyspark.sql import SparkSession
 
 logger = logging.getLogger(__name__)
 
@@ -21,28 +22,20 @@ def execute_pipeline():
     report_path = "/opt/airflow/data/reports/dq_report.json"
     output_dir = "/opt/airflow/data/output"
     
-    # Mocking um dataset caso não exista para que o teste seja fluído
-    if not os.path.exists(input_path):
-        import pandas as pd
-        logger.info("Criando mock dataset em data/input/data.csv pois não foi encontrado arquivo original.")
-        os.makedirs(os.path.dirname(input_path), exist_ok=True)
-        dummy_df = pd.DataFrame({
-            "timestamp": ["2023-10-01 10:00:00", "2023-10-02 11:00:00", "2023-10-03 12:00:00", "2023-10-04 13:00:00"],
-            "transaction_type": ["sale", "sale", "rent", "sale"],
-            "receiving address": ["addr_1", "addr_2", "addr_1", "addr_3"],
-            "amount": [1500.50, 2000.00, 300.00, 3500.00],
-            "location_region": ["Sudeste", "Sul", "Nordeste", "Sudeste"],
-            "risk score": [0.1, 0.5, 0.2, 0.9]
-        })
-        dummy_df.to_csv(input_path, index=False)
+    spark = SparkSession.builder \
+        .appName("LocadoraAirflowApp") \
+        .master("local[*]") \
+        .getOrCreate()
 
     pipeline = LocadoraPipeline(
-        extractor=CSVExtractor(input_path),
-        validator=PandasDataQualityValidator(report_path),
+        extractor=CSVExtractor(spark, input_path),
+        validator=PySparkDataQualityValidator(report_path),
         transformer=BusinessTransformer(),
-        loader=CSVLoader(output_dir)
+        loader=SparkCSVLoader(output_dir)
     )
+    
     pipeline.run()
+    spark.stop()
 
 default_args = {
     'owner': 'airflow',
@@ -56,11 +49,11 @@ default_args = {
 with DAG(
     'locadora_pipeline_dag',
     default_args=default_args,
-    description='Pipeline de Processamento de Dados da Locadora de Carros',
+    description='Pipeline de Processamento de Dados da Locadora de Carros (PySpark)',
     schedule_interval=timedelta(days=1),
     start_date=datetime(2023, 1, 1),
     catchup=False,
-    tags=['locadora', 'pipeline'],
+    tags=['locadora', 'pipeline', 'pyspark'],
 ) as dag:
 
     run_pipeline_task = PythonOperator(

@@ -1,44 +1,42 @@
-import pandas as pd
+import pytest
 from src.transformer.business_transformer import BusinessTransformer
 
-def test_transform_risk_score():
+def test_transform_risk_score(spark):
     transformer = BusinessTransformer()
-    df = pd.DataFrame({
-        "location_region": ["SP", "SP", "RJ", "MG"],
-        "risk score": [1.0, 2.0, 5.0, 3.0]
-    })
+    data = [
+        ("SP", 10.0), ("SP", 20.0),
+        ("RJ", 5.0)
+    ]
+    df = spark.createDataFrame(data, ["location_region", "risk score"])
     
-    result = transformer.transform_risk_score(df)
+    result_df = transformer.transform_risk_score(df)
+    results = result_df.collect()
     
-    assert len(result) == 3
-    # Espera-se que RJ seja o primeiro (media 5.0)
-    assert result.iloc[0]["location_region"] == "RJ"
-    assert result.iloc[0]["avg_risk_score"] == 5.0
-    
-    # Espera-se que MG seja o segundo (media 3.0)
-    assert result.iloc[1]["location_region"] == "MG"
-    
-    # Espera-se que SP seja o terceiro (media 1.5)
-    assert result.iloc[2]["location_region"] == "SP"
-    assert result.iloc[2]["avg_risk_score"] == 1.5
+    assert len(results) == 2
+    # SP should be first because 15 > 5
+    assert results[0]["location_region"] == "SP"
+    assert results[0]["risk_score"] == 15.0
+    assert results[1]["location_region"] == "RJ"
+    assert results[1]["risk_score"] == 5.0
 
-def test_transform_top_sales():
+def test_transform_top_sales(spark):
     transformer = BusinessTransformer()
-    df = pd.DataFrame({
-        "timestamp": ["2023-01-01", "2023-01-02", "2023-01-03", "2023-01-04"],
-        "transaction_type": ["sale", "sale", "sale", "rent"],
-        "receiving address": ["A", "B", "A", "C"],
-        "amount": [10.0, 50.0, 20.0, 100.0]
-    })
+    data = [
+        ("addr1", "sale", 100.0, "2023-01-01T10:00:00"),
+        ("addr1", "sale", 300.0, "2023-01-02T10:00:00"), # Mais recente pra addr1
+        ("addr2", "rent", 500.0, "2023-01-01T10:00:00"), # Deve ser ignorado (rent)
+        ("addr3", "sale", 50.0,  "2023-01-01T10:00:00"),
+        ("addr4", "sale", 150.0, "2023-01-01T10:00:00"),
+        ("addr5", "sale", 200.0, "2023-01-01T10:00:00"),
+    ]
+    df = spark.createDataFrame(data, ["receiving address", "transaction_type", "amount", "timestamp"])
     
-    result = transformer.transform_top_sales(df)
+    result_df = transformer.transform_top_sales(df)
+    results = result_df.collect()
     
-    assert len(result) == 2 # Somente os endereços A e B tiveram 'sale'
-    
-    # 'A' tem duas vendas (10 e 20). 20 é mais recente (2023-01-03).
-    # 'B' tem uma venda (50).
-    # Ordenado por amount decrescente, deve ficar B(50) e A(20).
-    assert result.iloc[0]["receiving address"] == "B"
-    assert result.iloc[0]["amount"] == 50.0
-    assert result.iloc[1]["receiving address"] == "A"
-    assert result.iloc[1]["amount"] == 20.0
+    assert len(results) == 3
+    # Top amounts should be addr1(300), addr5(200), addr4(150)
+    assert results[0]["receiving address"] == "addr1"
+    assert results[0]["amount"] == 300.0
+    assert results[1]["receiving address"] == "addr5"
+    assert results[2]["receiving address"] == "addr4"

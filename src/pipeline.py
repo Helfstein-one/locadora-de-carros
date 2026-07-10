@@ -28,7 +28,7 @@ class LocadoraPipeline:
         # 2. Quality & Cleanse
         df_clean = self.validator.validate(df_raw)
         
-        if df_clean.empty:
+        if df_clean.isEmpty():
             logger.warning("Nenhum dado válido após limpeza. Encerrando pipeline.")
             return
             

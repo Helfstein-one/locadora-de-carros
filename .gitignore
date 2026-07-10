@@ -4,7 +4,7 @@ __pycache__/
 .env
 .idea/
 .vscode/
-data/input/*.csv
+
 data/output/*.csv
 data/reports/*.json
 .pytest_cache/

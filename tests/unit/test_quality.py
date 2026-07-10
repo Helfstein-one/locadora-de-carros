@@ -1,37 +1,27 @@
-import pandas as pd
 import pytest
 import os
-from src.quality.validator import PandasDataQualityValidator
+import json
+from src.quality.validator import PySparkDataQualityValidator
 
-def test_validator_drops_invalid_rows(tmp_path):
-    report_file = tmp_path / "dq_report.json"
-    validator = PandasDataQualityValidator(str(report_file))
+def test_validator_drops_nulls_and_generates_report(spark, tmp_path):
+    report_path = os.path.join(tmp_path, "report.json")
+    validator = PySparkDataQualityValidator(report_path)
     
-    df = pd.DataFrame({
-        "timestamp": ["2023-01-01", "2023-01-02", "2023-01-03"],
-        "transaction_type": ["sale", "sale", "sale"],
-        "receiving address": ["A", "B", "C"],
-        "amount": [10.0, "invalid_amount", 30.0],
-        "location_region": ["SP", "RJ", "MG"],
-        "risk score": [1.0, 2.0, None]
-    })
+    data = [
+        ("2023-01-01 10:00:00", "sale", "addr1", "100.0", "SP", "10.0"),
+        (None, "sale", "addr2", "100.0", "SP", "10.0"), # Falta timestamp
+        ("2023-01-02 10:00:00", "rent", None, "100.0", "SP", "10.0"), # Falta addr
+        ("2023-01-03 10:00:00", "sale", "addr3", "invalido", "SP", "10.0"), # Vai virar null no cast de double
+    ]
+    df = spark.createDataFrame(data, ["timestamp", "transaction_type", "receiving address", "amount", "location_region", "risk score"])
     
-    result = validator.validate(df)
+    clean_df = validator.validate(df)
     
-    # Apenas a primeira linha deve ser válida (as outras tem erro no tipo de amount ou score nulo)
-    assert len(result) == 1
-    assert result.iloc[0]["receiving address"] == "A"
+    assert clean_df.count() == 1
     
-    # Checar se o arquivo json do report foi gerado
-    assert os.path.exists(report_file)
-
-def test_validator_missing_columns():
-    validator = PandasDataQualityValidator("dummy.json")
-    
-    df = pd.DataFrame({
-        "amount": [10.0]
-    })
-    
-    # Deve dar ValueError devido à falta de colunas esperadas
-    with pytest.raises(ValueError):
-        validator.validate(df)
+    assert os.path.exists(report_path)
+    with open(report_path, "r") as f:
+        report = json.load(f)
+        assert report["total_records_input"] == 4
+        assert report["total_records_valid"] == 1
+        assert report["errors"] == 3

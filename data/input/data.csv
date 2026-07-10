@@ -1,0 +1,15 @@
+timestamp,transaction_type,receiving address,amount,location_region,risk score
+2023-01-01T10:00:00,sale,addr_1,150.00,SP,12.5
+2023-01-02T11:00:00,rent,addr_2,50.00,RJ,5.0
+2023-01-03T12:00:00,sale,addr_3,200.00,MG,10.0
+2023-01-04T13:00:00,sale,addr_1,180.00,SP,15.0
+2023-01-05T14:00:00,rent,addr_4,75.00,RS,2.0
+2023-01-06T15:00:00,sale,addr_5,300.00,SP,8.0
+2023-01-07T16:00:00,sale,addr_2,250.00,RJ,6.5
+2023-01-08T17:00:00,sale,addr_6,500.00,MG,20.0
+2023-01-09T18:00:00,sale,addr_3,100.00,MG,11.0
+2023-01-10T19:00:00,rent,addr_1,60.00,SP,14.0
+,sale,addr_erro_1,100.00,SP,10.0
+2023-01-11T10:00:00,sale,,200.00,RJ,10.0
+2023-01-12T10:00:00,sale,addr_erro_3,invalido,MG,10.0
+2023-01-13T10:00:00,sale,addr_erro_4,100.00,BA,invalido

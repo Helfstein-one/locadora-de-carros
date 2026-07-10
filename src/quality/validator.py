@@ -1,62 +1,53 @@
-import pandas as pd
 import logging
 import json
 import os
+from pyspark.sql import DataFrame
+from pyspark.sql.functions import col, isnan
 from src.interfaces.quality import DataQualityInterface
 
 logger = logging.getLogger(__name__)
 
-class PandasDataQualityValidator(DataQualityInterface):
-    def __init__(self, report_path: str = "data/reports/dq_report.json"):
+class PySparkDataQualityValidator(DataQualityInterface):
+    def __init__(self, report_path: str):
         self.report_path = report_path
 
-    def validate(self, df: pd.DataFrame) -> pd.DataFrame:
-        logger.info("Iniciando Data Quality Check")
-        total_records = len(df)
+    def validate(self, df: DataFrame) -> DataFrame:
+        logger.info("Iniciando validação de Data Quality com PySpark...")
         
-        if total_records == 0:
-            logger.warning("DataFrame vazio!")
-            return df
+        total_records = df.count()
+        
+        # Tipagem
+        df = df.withColumn("amount", col("amount").cast("double")) \
+               .withColumn("timestamp", col("timestamp").cast("timestamp")) \
+               .withColumn("risk score", col("risk score").cast("double"))
+
+        # Checagem de nulos
+        null_counts = {}
+        for c, t in df.dtypes:
+            if t in ("double", "float"):
+                condition = col(c).isNull() | isnan(col(c))
+            else:
+                condition = col(c).isNull()
+            null_count = df.filter(condition).count()
+            null_counts[c] = int(null_count)
             
-        # Contagem de nulos
-        null_counts = df.isnull().sum().to_dict()
+        # Dropar registros inválidos nas colunas principais
+        df_clean = df.na.drop(subset=["timestamp", "receiving address", "amount", "transaction_type"])
         
-        # Colunas requeridas conforme as regras de negócio
-        required_cols = ['timestamp', 'transaction_type', 'receiving address', 'amount', 'location_region', 'risk score']
-        
-        missing_cols = [col for col in required_cols if col not in df.columns]
-        if missing_cols:
-            raise ValueError(f"O CSV não possui as colunas necessárias: {missing_cols}")
-            
-        # Limpeza de nulos nas colunas chave para a análise
-        df_clean = df.dropna(subset=required_cols).copy()
-        
-        # Padronizando tipos
-        df_clean['timestamp'] = pd.to_datetime(df_clean['timestamp'], errors='coerce')
-        df_clean['amount'] = pd.to_numeric(df_clean['amount'], errors='coerce')
-        df_clean['risk score'] = pd.to_numeric(df_clean['risk score'], errors='coerce')
-        
-        # Removendo linhas que falharam na conversão de tipos
-        df_clean = df_clean.dropna(subset=['timestamp', 'amount', 'risk score'])
-        
-        dropped_records = total_records - len(df_clean)
+        total_clean = df_clean.count()
+        dropped_records = total_records - total_clean
         
         report = {
             "total_records_input": int(total_records),
-            "total_records_valid": int(len(df_clean)),
+            "total_records_valid": int(total_clean),
             "errors": int(dropped_records),
-            "compliance_percentage": float(round((len(df_clean) / total_records) * 100, 2)) if total_records > 0 else 0.0,
-            "nulls_per_column": {k: int(v) for k, v in null_counts.items()}
+            "compliance_percentage": float(round((total_clean / total_records) * 100, 2)) if total_records > 0 else 0.0,
+            "nulls_per_column": null_counts
         }
         
-        # Garantindo que o diretório do report existe
         os.makedirs(os.path.dirname(self.report_path), exist_ok=True)
-        
-        try:
-            with open(self.report_path, 'w') as f:
-                json.dump(report, f, indent=4)
-            logger.info(f"Reporte de DQ gerado em {self.report_path} com {report['compliance_percentage']}% de conformidade.")
-        except Exception as e:
-            logger.warning(f"Erro ao salvar DQ report: {e}")
-
+        with open(self.report_path, "w") as f:
+            json.dump(report, f, indent=4)
+            
+        logger.info(f"Data Quality validada. Conformidade: {report['compliance_percentage']}%")
         return df_clean

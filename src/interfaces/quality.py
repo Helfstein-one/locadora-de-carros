@@ -1,12 +1,11 @@
 from abc import ABC, abstractmethod
-import pandas as pd
+from pyspark.sql import DataFrame
 
 class DataQualityInterface(ABC):
     @abstractmethod
-    def validate(self, df: pd.DataFrame) -> pd.DataFrame:
+    def validate(self, df: DataFrame) -> DataFrame:
         """
         Valida o DataFrame.
-        Deve gerar métricas/reports e pode remover registros inválidos 
-        antes de retornar o DF limpo.
+        Deve gerar métricas/reports sobre anomalias e retornar apenas os dados válidos.
         """
         pass

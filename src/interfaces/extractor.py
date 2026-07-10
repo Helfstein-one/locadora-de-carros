@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
-import pandas as pd
+from pyspark.sql import DataFrame
 
 class ExtractorInterface(ABC):
     @abstractmethod
-    def extract(self) -> pd.DataFrame:
-        """Extrai os dados e retorna como um DataFrame do Pandas."""
+    def extract(self) -> DataFrame:
+        """Extrai os dados e retorna como um DataFrame do PySpark."""
         pass
