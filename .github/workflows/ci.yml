@@ -29,4 +29,10 @@ jobs:
       env:
         PYTHONPATH: ${{ github.workspace }}
       run: |
-        pytest tests/
+        pytest tests/unit/
+
+    - name: Run Integration Tests
+      env:
+        PYTHONPATH: ${{ github.workspace }}
+      run: |
+        pytest tests/integration/
