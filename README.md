@@ -58,7 +58,7 @@ flowchart TD
     end
     
     subgraph Destino
-        T1 --> L[Loader\nCoalesce(1).write]
+        T1 --> L[Loader\nCoalesce File]
         T2 --> L
         L --> O1[risk_score_por_regiao.csv]
         L --> O2[top_3_sales_recentes.csv]
