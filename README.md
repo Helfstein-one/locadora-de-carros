@@ -199,3 +199,28 @@ A Action no GitHub separa de forma isolada (em jobs distintos) dois fluxos princ
 2. **Integration Tests (Testes de Integração):**
    - **Como funciona:** O job `test-integration` roda em uma esteira completamente separada. Ele executa os testes localizados em `tests/integration/`.
    - **O que avalia:** Avalia o cenário de ponta-a-ponta (Macro). Um dataset fake é gerado em tempo de execução e a classe controladora `LocadoraPipeline` é instanciada e executada. O teste acompanha se o dado flui corretamente e sem atritos sistêmicos desde o `Extractor` até o `Loader`, verificando se os arquivos foram efetivamente gerados no disco com os resultados perfeitos.
+
+---
+
+## 🛡️ Análise de Qualidade de Dados (Erros e Anomalias)
+
+Conforme os requisitos do desafio técnico, implementou-se uma etapa automatizada e rigorosa de Data Quality. O módulo avalia minuciosamente o CSV ingerido em busca de **valores faltantes (nulos), inconsistentes e incorretos**.
+
+As métricas geradas são sumarizadas automaticamente no arquivo `data/reports/dq_report.json`, contendo os indicadores essenciais:
+- **Quantidade de Registros:** O volume bruto de transações ingeridas.
+- **Quantidade de Erros (Anomalias):** A contabilização estrita de registros que falharam na inspeção de negócios (ex: anomalias onde esperava-se um `float` mas veio uma string quebrando a consistência do sistema, ou campos de `timestamp` ausentes).
+- **Valores Faltantes:** Um rastreamento mapeado coluna a coluna apontando a ausência de preenchimento de campos vitais.
+- **Percentual de Conformidade:** A métrica monitorada evidenciando matematicamente a razão de incidentes (`qtd. erros / qtd. registros`), além da taxa geral de saúde da base.
+
+Todo registro considerado inconsistente ou incorreto é reportado neste arquivo isolado e descartado do *DataFrame* que avança, blindando e imunizando o `Transformer` contra cálculos errôneos de médias ou corrupção da ordenação do ranking.
+
+---
+
+## 📈 Possíveis Evoluções (Next Steps)
+
+Pensando no ciclo de vida em longo prazo e na escalabilidade deste ecossistema corporativo de dados, listamos melhorias que trariam amadurecimento ao produto:
+
+1. **Escalabilidade Computacional (PySpark/Polars):** Dado que atualmente o Pandas é in-memory, caso o volume diário de locações da empresa atinja a casa dos Gigabytes ou Terabytes, migrar o núcleo de processamento do Transformer para `PySpark` (Distributed Processing) ou `Polars` (Multithreading em Rust) impediria crashes por falta de memória (OOM).
+2. **Qualidade de Dados Estrita (Great Expectations & Data Contracts):** Substituir as lógicas manuais de qualidade na etapa do *Validator* para um framework focado como o `Great Expectations` ou forçar Data Contracts puros utilizando o `Pydantic` de maneira agressiva.
+3. **Migração para Data Warehouse / Data Lake (Modern Data Stack):** Em vez de descarregar dados processados em arquivos localmente via `CSVLoader`, criar um novo injetor que mande a saída num formato colunar (`Parquet`) para um bucket na AWS (S3) catalogado pelo Glue, ou para um DW robusto como Google BigQuery / Snowflake. Dessa forma, as equipes de visualização e Business Intelligence teriam as tabelas diretamente plugadas no Power BI.
+4. **Governança de Orquestração (Cloud):** Abstrair a atual subida de infraestrutura do Airflow cru em contêineres Docker para utilizá-la como Serverless ou serviço gerenciado usando o AWS MWAA (Managed Workflows for Apache Airflow) ou Google Cloud Composer, livrando as equipes de sustentar o servidor web e o banco Postgres dos metadados.
