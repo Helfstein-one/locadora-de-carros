@@ -183,3 +183,19 @@ Se você é um desenvolvedor e deseja validar a lógica sem subir a infraestrutu
    export PYTHONPATH=$(pwd)
    pytest tests/
    ```
+
+---
+
+## 🤖 Integração Contínua (CI/CD) e Alta Confiabilidade
+
+Para garantir a **Alta Confiabilidade**, este repositório está integrado nativamente ao GitHub Actions. O arquivo `.github/workflows/ci.yml` automatiza a qualidade de código sempre que existe um novo envio (push) ou uma nova proposta de código (pull_request) nas branches `develop` e `main`.
+
+A Action no GitHub separa de forma isolada (em jobs distintos) dois fluxos principais:
+
+1. **Unit Tests (Testes Unitários):**
+   - **Como funciona:** O job `test-unit` instala o ambiente e as dependências em uma máquina virtual Linux provida pelo GitHub. Ele executa exclusivamente os testes contidos na pasta `tests/unit/`.
+   - **O que avalia:** Foca microscopicamente na lógica interna das Classes. Por exemplo, valida matematicamente se o cálculo da média do Risk Score está correto ou se a lógica do Top 3 funciona (lidando com empates, etc), sem se preocupar com leitura real de arquivos ou com a orquestração final. 
+
+2. **Integration Tests (Testes de Integração):**
+   - **Como funciona:** O job `test-integration` roda em uma esteira completamente separada. Ele executa os testes localizados em `tests/integration/`.
+   - **O que avalia:** Avalia o cenário de ponta-a-ponta (Macro). Um dataset fake é gerado em tempo de execução e a classe controladora `LocadoraPipeline` é instanciada e executada. O teste acompanha se o dado flui corretamente e sem atritos sistêmicos desde o `Extractor` até o `Loader`, verificando se os arquivos foram efetivamente gerados no disco com os resultados perfeitos.
