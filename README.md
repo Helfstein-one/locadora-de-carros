@@ -67,6 +67,57 @@ flowchart TD
     CSV --> E
 ```
 
+### 2. Orquestração e Ciclo de Vida da JVM (Sequence Diagram)
+Este diagrama foca na injeção de dependência e no controle da **SparkSession**, provando a orquestração ponta a ponta:
+
+```mermaid
+sequenceDiagram
+    participant DAG as Airflow DAG / Local Runner
+    participant Pipeline as LocadoraPipeline
+    participant Spark as SparkSession (JVM)
+    participant Extractor
+    participant Validator
+    participant Transformer
+    participant Loader
+
+    DAG->>Spark: Inicializa Sessão Spark (Master Local/Cluster)
+    DAG->>Pipeline: Injeta Interfaces e Sessão
+    
+    activate Pipeline
+    Pipeline->>Extractor: extract()
+    Extractor-->>Pipeline: PySpark DataFrame (Lazy Read)
+    
+    Pipeline->>Validator: validate(df_raw)
+    Note over Validator: Execução Distribuída:<br/>df.withColumn(...cast())<br/>Check de nulos e isnan
+    Validator->>Relatórios: Grava dq_report.json local
+    Validator-->>Pipeline: DataFrame tipado e purificado
+    
+    Pipeline->>Transformer: transform_risk_score(df_clean)
+    Note over Transformer: df.groupBy(...).agg(avg(...))
+    Transformer-->>Pipeline: DataFrame de Risk Score
+    
+    Pipeline->>Transformer: transform_top_sales(df_clean)
+    Note over Transformer: Window.partitionBy(...).orderBy(...)
+    Transformer-->>Pipeline: DataFrame Top 3
+    
+    Pipeline->>Loader: load(dataframes_dict)
+    Note over Loader: df.coalesce(1).write.csv()
+    Loader->>Outputs: Salva na pasta data/output/
+    Loader-->>Pipeline: OK
+    
+    Pipeline->>Spark: spark.stop() (Encerra JVM)
+    deactivate Pipeline
+    DAG-->>Usuário: Job Airflow Finalizado
+```
+
+### Explicação Granular de Cada Etapa (PySpark Engine):
+1. **Extractor (Leitura Distribuída):** O `CSVExtractor` não carrega o arquivo para a memória RAM bruta. Ele cria um ponteiro virtual (Lazy Evaluation) apontando para o disco via `spark.read.csv()`, inferindo o esquema nativamente. Se amanhã houver 1000 arquivos CSVs, ele lê todos simultaneamente em cluster.
+2. **Validator (Quality & Cleanse):** Recebe o DataFrame PySpark e executa tipagem (`cast`) massiva em paralelo nas *tasks*. Através da API de colunas, verifica nulos e gera a "Taxa de Conformidade" exportada no Json. O *Drop* nativo isola transações sujas e salva a matemática financeira.
+3. **Transformer (Business Logic):** Coração analítico. Não há uso de loopings custosos (`for`). 
+   - Na Tabela 1, usamos `df.groupBy().agg(avg())`, delegando o cálculo da média por região pros nós de processamento da JVM.
+   - Na Tabela 2, o ranqueamento de "vendas mais recentes" é solucionado sem gargalos utilizando `pyspark.sql.window.Window`. A base é particionada em memória RAM virtual por `receiving address`, filtrada pela linha mais nova e em seguida submetida a um limitador universal (Top 3) utilizando as otimizações do *Catalyst Optimizer* do Spark.
+4. **Loader (Persistência):** O `SparkCSVLoader` recebe o ponteiro do trabalho finalizado. Como o Spark salva dados em dezenas de minúsculos arquivos (`part-000x`), utilizamos `.coalesce(1)` para forçar a junção no último nó e descarregar um único arquivo `.csv` final na pasta `data/output/`.
+
 ---
 
 ## 🚀 Como Rodar o Projeto
