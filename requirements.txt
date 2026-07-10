@@ -1,0 +1,4 @@
+pandas
+pydantic
+pytest==7.4.3
+pytest-mock==3.12.0
