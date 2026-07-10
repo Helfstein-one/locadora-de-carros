@@ -1,110 +1,81 @@
 # 🚗 Locadora de Carros - Data Pipeline
 
-Este projeto é uma solução de Engenharia de Dados para o processamento, limpeza e análise de dados de transações de uma locadora de carros. Ele foi desenvolvido com foco em alta confiabilidade, aplicando princípios **SOLID**, **Programação Orientada a Objetos (OOP)** e utilizando **Docker** e **Apache Airflow** para orquestração automatizada.
+Este projeto é uma solução de Engenharia de Dados para o processamento, limpeza e análise de dados de transações de uma locadora de carros. Ele foi desenvolvido com foco em alta confiabilidade, aplicando princípios **SOLID**, **Programação Orientada a Objetos (OOP)**, conteinerização via **Docker** e orquestração automatizada via **Apache Airflow**.
 
-## 🎯 Objetivo do Pipeline
+## 🏗️ Arquitetura e Componentes (Visão Granular)
 
-O pipeline executa as seguintes tarefas, de forma automatizada:
-1. **Importação (Extract):** Faz a ingestão do arquivo CSV de entrada contendo o histórico de transações.
-2. **Qualidade de Dados & Limpeza (Quality & Cleanse):** Monitora métricas de qualidade (linhas nulas, valores inválidos, anomalias) gerando reports e limpando o dataset.
-3. **Transformação (Transform):** Processa os dados limpos para criar duas tabelas-resultado específicas:
-   - **Tabela 1:** Lista em ordem decrescente as `location_region` pela média de `risk score`.
-   - **Tabela 2:** Lista os Top 3 `receiving address` com maior `amount` dentre as transações mais recentes (onde `transaction_type` = `sale`).
-4. **Carga (Load):** Exporta os dados finais gerados no formato `.csv` (ou persiste num banco de dados, conforme configuração).
-
-## 🏗️ Arquitetura e Componentes
-
-A solução foi pensada de maneira modular para ser executada em qualquer ambiente (via containers) e facilitar testes unitários e extensibilidade.
+A solução foi pensada de maneira modular (SOLID). Cada módulo da aplicação tem uma responsabilidade única, e as dependências são baseadas em abstrações (Interfaces).
 
 ```mermaid
-graph TD
-    A[Dataset Original CSV] --> B(Extractor)
-    B --> C(Data Quality Validator)
-    C -- Logs de Erros --> DQ_Report[(Relatórios de Data Quality)]
-    C -- Dados Validados --> D(Transformer)
-    D --> T1[Tabela 1: Risk Score por Região]
-    D --> T2[Tabela 2: Top 3 Sales]
-    T1 --> E(Loader)
-    T2 --> E
-    E --> F[(Output Final)]
+sequenceDiagram
+    participant Airflow DAG
+    participant Pipeline (Controller)
+    participant Extractor (Ler)
+    participant Validator (DQ)
+    participant Transformer (Regras)
+    participant Loader (Gravar)
+
+    Airflow DAG->>Pipeline: Dispara a execução
     
-    subgraph Orquestração (Airflow)
-    B
-    C
-    D
-    E
-    end
+    activate Pipeline
+    Pipeline->>Extractor: extract()
+    Extractor-->>Pipeline: DataFrame bruto (dados lidos)
+    
+    Pipeline->>Validator: validate(df_raw)
+    Note over Validator: 1. Checa nulidade<br/>2. Converte tipos<br/>3. Descarta anomalias
+    Validator->>Reports (Disco): Salva dq_report.json
+    Validator-->>Pipeline: DataFrame limpo e tipado
+    
+    Pipeline->>Transformer: transform_risk_score(df_clean)
+    Note over Transformer: Agrupa por 'location_region'<br/>Calcula média de 'risk score'
+    Transformer-->>Pipeline: df_risk_score (Tabela 1)
+    
+    Pipeline->>Transformer: transform_top_sales(df_clean)
+    Note over Transformer: Filtra 'sale'<br/>Retém a mais recente por endereço<br/>Pega top 3 'amount'
+    Transformer-->>Pipeline: df_top_sales (Tabela 2)
+    
+    Pipeline->>Loader: load({Tabela1, Tabela2})
+    Loader->>Outputs (Disco): Salva .csv finais
+    Loader-->>Pipeline: Sucesso
+    
+    deactivate Pipeline
+    Airflow DAG-->>Usuário: Job Concluído
 ```
 
-### 🧩 Boas Práticas e SOLID
-- **Single Responsibility Principle (SRP):** Cada módulo (`extractor.py`, `transformer.py`, `loader.py`, `quality.py`) possui uma única responsabilidade. O Transformer não sabe de onde vêm os dados, ele apenas processa DataFrames.
-- **Dependency Inversion Principle (DIP):** O pipeline principal depende de abstrações (`ExtractorInterface`, `LoaderInterface`) ao invés de implementações diretas. Isso permite trocar de um CSV Extractor para um SQL Extractor no futuro sem alterar o motor do pipeline.
-- **Testabilidade:** A lógica de cálculo do *Risk Score* e dos *Top 3 Sales* está isolada no Transformer, permitindo testes unitários rigorosos sem necessidade de dependências externas.
+### Explicação Granular de Cada Etapa:
+1. **Extractor:** Lê o arquivo original (CSV) do disco ou storage. Ele foi projetado usando injeção de dependência (`ExtractorInterface`), de modo que pode ser facilmente trocado por uma conexão de banco de dados sem quebrar o sistema.
+2. **Validator (Quality & Cleanse):** Recebe o dado bruto e processa regras de conformidade utilizando Pandas. Tipos inconsistentes são reportados. Um arquivo `dq_report.json` é persistido indicando a quantidade de registros válidos e percentual de conformidade.
+3. **Transformer (Core Business Logic):** Isola todas as regras de negócio para facilitar a testabilidade unitária. Nenhuma escrita ou leitura externa acontece aqui, ele manipula dataframes puramente.
+4. **Loader:** Pega o resultado final e orquestra a gravação no disco na pasta `data/output/`.
 
-## 🛠️ Tecnologias Utilizadas
-- **Python 3.11+**: Linguagem principal.
-- **Pandas**: Para as transformações tabulares em memória.
-- **Pydantic**: Para validação rigorosa dos tipos e dados (Data Quality).
-- **Apache Airflow**: Para orquestração da DAG do pipeline de dados.
-- **Docker & Docker Compose**: Para containerização e padronização do ambiente.
-- **Pytest**: Para testes unitários e de integração.
+## 🚀 Como Rodar o Projeto
 
-## 🚀 Como Executar
+Você tem duas opções para rodar o pipeline: através do Airflow (Conteinerizado) para simular o ambiente de produção, ou via linha de comando local.
 
-### 1. Pré-requisitos
-- Ter o **Docker** e o **Docker Compose** instalados na sua máquina.
-- Colocar o arquivo CSV original na pasta `data/input/`.
+### Opção 1: Via Docker & Apache Airflow (Ambiente de Produção)
+Esta é a maneira sugerida e aderente ao requisito de Orquestração Automatizada.
 
-### 2. Subindo o Ambiente (Airflow)
-Na raiz do projeto, execute:
-```bash
-docker-compose up -d --build
-```
-Isso fará o build da imagem customizada (que inclui o Pandas, Pytest, Pydantic) e iniciará os serviços do Airflow (Webserver, Scheduler, Postgres).
+1. **Subir os serviços:** Na raiz do projeto, digite:
+   ```bash
+   docker-compose up -d --build
+   ```
+2. **Acessar o Painel:** Abra o navegador em `http://localhost:8080`.
+3. **Login:** Use `airflow` para usuário e senha.
+4. **Rodar a DAG:** Procure por `locadora_pipeline_dag`, mude o botão de "Paused" para "Active" e aperte o botão "Play" (Trigger DAG).
+5. **Checar Resultados:** Os arquivos finais estarão em `data/output/` e o report de qualidade em `data/reports/`.
 
-### 3. Acessando a Orquestração
-- Acesse o Airflow através do navegador em: `http://localhost:8080`
-- **Usuário:** `airflow` | **Senha:** `airflow`
-- Na interface web, procure pela DAG `locadora_pipeline_dag` e ative-a (botão de toggle).
-- Clique em **Trigger DAG** (play) para iniciar o processamento manualmente.
+### Opção 2: Testes Locais e Execução de Desenvolvimento
+Caso queira validar o código em seu computador sem submeter ao Docker:
 
-### 4. Verificando os Resultados
-Após a execução com sucesso:
-- **Tabelas de Resultado:** Estarão disponíveis na pasta `data/output/`.
-- **Relatório de Data Quality:** O arquivo contendo as métricas (linhas ignoradas, nulos, tipagem incorreta) estará disponível em `data/reports/dq_report.json`.
-
-## 🧪 Rodando os Testes
-
-Para garantir a confiabilidade (Alta Confiabilidade), o projeto conta com suítes de testes automatizados. Você pode executá-los através do próprio container:
-
-```bash
-# Para testes unitários
-docker-compose exec airflow-webserver pytest tests/unit/
-
-# Para testes integrados (fluxo de ponta a ponta com dados mockados)
-docker-compose exec airflow-webserver pytest tests/integration/
-```
-
-## 📂 Estrutura de Pastas
-```text
-locadora_de_carros/
-├── dags/
-│   └── locadora_pipeline_dag.py     # DAG do Airflow
-├── data/
-│   ├── input/                       # Coloque o CSV de entrada aqui
-│   ├── output/                      # Tabelas-resultado geradas
-│   └── reports/                     # Métricas de Data Quality
-├── src/
-│   ├── interfaces/                  # Classes base e interfaces (SOLID)
-│   ├── extractor/                   # Leitura de dados (CSV, etc)
-│   ├── quality/                     # Validação e métricas Pydantic
-│   ├── transformer/                 # Regras de negócio / agregações
-│   ├── loader/                      # Persistência do resultado
-│   └── pipeline.py                  # Orquestrador central em Python
-├── tests/
-│   ├── unit/                        # Testes isolados
-│   └── integration/                 # Testes de ponta a ponta
-├── docker-compose.yml               # Arquitetura de containers
-├── Dockerfile                       # Imagem base Airflow com dependências
-└── requirements.txt                 # Bibliotecas Python (Pandas, Pytest, Pydantic)
-```
+1. **Criar um ambiente virtual e instalar requisitos:**
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
+   ```
+2. **Rodar a Suíte de Testes (Alta Confiabilidade):**
+   Temos testes unitários (`tests/unit`) e de integração (`tests/integration`) mockando ponta-a-ponta.
+   ```bash
+   export PYTHONPATH=$(pwd)
+   pytest tests/
+   ```
