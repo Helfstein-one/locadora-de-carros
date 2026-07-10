@@ -42,6 +42,34 @@ sequenceDiagram
     Airflow DAG-->>Usuário: Job Concluído
 ```
 
+### Fluxo Funcional de Processamento
+Este diagrama mostra o caminho dos dados, de ponta a ponta:
+
+```mermaid
+flowchart TD
+    subgraph Data Sources
+        CSV[Arquivo CSV\n'Transações']
+    end
+    
+    subgraph Pipeline de Dados
+        E[Extractor\nLê o CSV] --> Q[Data Quality\nPandas Validator]
+        Q -- Gera Report --> R[dq_report.json\nMétricas de DQ]
+        Q -- Dados Limpos --> T{Transformer\nRegras de Negócio}
+        
+        T -- Agrupamento & Média --> T1[Cálculo de Risk Score\npor Região]
+        T -- Filtros & Top 3 --> T2[Cálculo Top 3\nSales Recentes]
+    end
+    
+    subgraph Destino
+        T1 --> L[Loader\nGrava em Disco]
+        T2 --> L
+        L --> O1[risk_score_por_regiao.csv]
+        L --> O2[top_3_sales_recentes.csv]
+    end
+    
+    CSV --> E
+```
+
 ### Explicação Granular de Cada Etapa:
 1. **Extractor:** Lê o arquivo original (CSV) do disco ou storage. Ele foi projetado usando injeção de dependência (`ExtractorInterface`), de modo que pode ser facilmente trocado por uma conexão de banco de dados sem quebrar o sistema.
 2. **Validator (Quality & Cleanse):** Recebe o dado bruto e processa regras de conformidade utilizando Pandas. Tipos inconsistentes são reportados. Um arquivo `dq_report.json` é persistido indicando a quantidade de registros válidos e percentual de conformidade.
