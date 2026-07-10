@@ -48,7 +48,7 @@ flowchart TD
         CSV[Arquivo CSV\n'Transações']
     end
     
-    subgraph Pipeline Distribuído (PySpark)
+    subgraph Pipeline Distribuido PySpark
         E[Extractor\nSpark Session Read] --> Q[Data Quality\nPySpark Validator]
         Q -- Gera Report --> R[dq_report.json\nMétricas de DQ]
         Q -- DataFrame Limpo --> T{Transformer\nRegras de Negócio}
