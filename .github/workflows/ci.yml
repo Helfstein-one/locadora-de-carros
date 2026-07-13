@@ -56,3 +56,19 @@ jobs:
         PYTHONPATH: ${{ github.workspace }}
       run: |
         pytest tests/integration/
+
+  test-docker:
+    name: Docker Execution Test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Build Docker Image
+      run: |
+        docker build -t locadora-pipeline .
+        
+    - name: Run Pipeline in Container
+      run: |
+        docker run --rm --user root --entrypoint python3 -v ${{ github.workspace }}:/opt/airflow locadora-pipeline /opt/airflow/run_local_spark.py
