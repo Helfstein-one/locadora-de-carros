@@ -71,4 +71,5 @@ jobs:
         
     - name: Run Pipeline in Container
       run: |
-        docker run --rm --user root --entrypoint python3 -v ${{ github.workspace }}:/opt/airflow locadora-pipeline /opt/airflow/run_local_spark.py
+        chmod -R 777 ${{ github.workspace }}/data
+        docker run --rm --entrypoint python3 -v ${{ github.workspace }}:/opt/airflow locadora-pipeline /opt/airflow/run_local_spark.py
