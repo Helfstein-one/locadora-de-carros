@@ -9,3 +9,6 @@ data/output/*.csv
 data/reports/*.json
 .pytest_cache/
 data/input/df_fraud_credit.csv
+airflow.cfg
+airflow.db
+logs/

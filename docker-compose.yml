@@ -44,6 +44,7 @@ services:
   airflow-webserver:
     <<: *airflow-common
     command: webserver
+    restart: always
     ports:
       - 8080:8080
     healthcheck:
@@ -51,7 +52,14 @@ services:
       interval: 10s
       timeout: 10s
       retries: 5
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   airflow-scheduler:
     <<: *airflow-common
     command: scheduler
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
