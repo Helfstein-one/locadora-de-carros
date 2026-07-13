@@ -32,7 +32,10 @@ class PySparkDataQualityValidator(DataQualityInterface):
             null_counts[c] = int(null_count)
             
         # Dropar registros inválidos nas colunas principais
-        df_clean = df.na.drop(subset=["timestamp", "receiving_address", "amount", "transaction_type"])
+        df_clean = df.na.drop(subset=["timestamp", "receiving_address", "amount", "transaction_type", "risk_score"])
+        
+        # Expurgar anomalias de tipagem e mapeamento corrompido (ex: região "0")
+        df_clean = df_clean.filter(col("location_region") != "0")
         
         total_clean = df_clean.count()
         dropped_records = total_records - total_clean
