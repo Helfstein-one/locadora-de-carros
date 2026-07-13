@@ -157,3 +157,48 @@ Para rodá-los na sua máquina:
 export PYTHONPATH=$(pwd)
 pytest tests/
 ```
+
+---
+
+## 📘 Diretrizes de Evolução Arquitetural - Pipeline de Dados (Para Candidatos)
+
+Este documento estabelece os padrões técnicos, arquiteturais e metodológicos exigidos para a evolução do pipeline de dados da Locadora de Carros, garantindo a construção de uma solução escalável, resiliente e de fácil manutenção.
+
+### 1. Instruções para o Candidato (Entrega)
+Como parte do processo de evolução desta plataforma de dados, é imperativo que a engenharia entregue não apenas código, mas clareza operacional. Sua entrega deverá conter obrigatoriamente:
+- **Topologia Arquitetural:** Construa e versionar um diagrama técnico utilizando o [Draw.io](https://app.diagrams.net/). O diagrama deve mapear o fluxo do dado desde a origem (Input), passando pelas camadas de processamento no *Engine* escolhido, até o armazenamento analítico final (Output), evidenciando a orquestração e a rede.
+- **Definição do Orquestrador:** Documente no `README.md` a justificativa técnica para a escolha da ferramenta de orquestração (ex: Apache Airflow, Prefect, Dagster ou Mage). Baseie sua decisão em fatores como tolerância a falhas, ecossistema de integrações, curva de aprendizado e overhead de infraestrutura.
+- **Estratégia de Conteinerização:** O ambiente deve ser isolado e imutável. Documente o setup do Docker (ou Podman), detalhando a persistência de dados (Volumes), comunicação de componentes (Networks) e forneça o comando exato de *bring-up* (ex: `docker-compose up -d --build`).
+- **Processo de Entrega (Git Flow):** Todo novo código deve ser gerado a partir de uma branch isolada (ex: `feature/orchestration-setup`). A entrega final deve ser feita exclusivamente via *Pull Request (PR)* direcionada para a branch `main`, contendo a descrição das mudanças e evidências de sucesso na execução.
+
+### 2. Justificativa de Arquitetura (Por que agir assim?)
+A adoção do tripé **Orquestração + Conteinerização + Git Flow via Pull Request** não é preciosismo tecnológico; é a fundação de um *Modern Data Stack* empresarial:
+- **Conteinerização (Reprodutibilidade):** Isola dependências e o *runtime* do processamento de dados. Isso erradica o sintoma de "funciona na minha máquina", permitindo que o pipeline rode idêntico no ambiente de desenvolvimento, homologação e produção.
+- **Orquestração (Escalabilidade e Resiliência):** Scripts `cron` não são suficientes para arquiteturas robustas. Um orquestrador genuíno provê controle de dependências entre tarefas (DAGs), gerencia repetições automáticas em caso de falha intermitente (retries) e garante um monitoramento visual claro de gargalos e quedas na malha de dados.
+- **Git Flow via PR (Governança e Code Review):** Protege a branch `main` de injeções de código instáveis. A exigência de PR fomenta a revisão assíncrona por pares, aciona pipelines automáticas de CI/CD (testes unitários/lint) e garante um histórico limpo e auditável das evoluções da engenharia.
+
+### 3. Design de Software (Classes, Interfaces e Módulos)
+Para garantir que a base de código do projeto suporte evoluções (ex: trocar a fonte de CSV para um banco SQL, ou migrar de Pandas para PySpark) sem causar impactos massivos, o projeto deve adotar princípios do **SOLID** e da **Clean Architecture**.
+
+Propomos a seguinte estrutura modular:
+
+#### 3.1. Separação de Módulos Principais
+A base de código deve estar delimitada por responsabilidades lógicas em diretórios (`/src`):
+- `core/domain`: Contém as regras de negócio puras (ex: lógicas de cálculo de Risk Score, agregações financeiras). Não deve conhecer banco de dados ou formato de arquivos.
+- `infrastructure`: Implementa as conexões com o mundo externo (ex: conectores do S3, leitura de CSV, gravação no Postgres).
+- `pipelines` (ou `use_cases`): Camada de orquestração de software que "liga os fios", instanciando as classes da infraestrutura e injetando as abstrações do domínio para rodar a pipeline.
+
+#### 3.2. Interfaces (Contratos Abstratos)
+O princípio da *Inversão de Dependência (DIP - SOLID)* deve ser aplicado rigorosamente. Os processadores de dados não podem depender de classes concretas, mas sim de contratos:
+- `DataExtractorInterface`: Define o contrato `extract() -> DataFrame`. Garante que a transformação não saiba se o dado veio de uma API ou de um arquivo local.
+- `DataQualityInterface`: Define o contrato `validate(df) -> DataFrame`, expondo métricas padronizadas para qualquer motor de validação.
+- `DataTransformerInterface`: Isola o motor matemático (`transform_logic(df)`).
+- `DataLoaderInterface`: Define a persistência final (`load(dataframes_dict)`).
+
+#### 3.3. Classes de Execução (Implementações Concretas)
+Classes palpáveis que respeitam os contratos da camada de *Interfaces*. Estas abrigam as bibliotecas pesadas:
+- **Extração:** `CSVExtractor(DataExtractorInterface)` - Encarregada de ler os dados físicos via motor distribuído.
+- **Transformação e Qualidade:**
+  - `PySparkValidator(DataQualityInterface)` - Valida tipagem, verifica nulos (`isNull`, `isnan`) e expurga anomalias emitindo logs e percentual de conformidade.
+  - `BusinessTransformer(DataTransformerInterface)` - Recebe um DataFrame PySpark (ou Polars/Pandas) e executa o *Data Crunching* pesado utilizando agregações e processamentos temporais complexos.
+- **Carga:** `SparkCSVLoader(DataLoaderInterface)` - Implementa a unificação inteligente de partições visando entregar produtos de dados centralizados e consistentes aos consumidores analíticos.
