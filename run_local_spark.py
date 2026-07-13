@@ -18,7 +18,7 @@ logger = logging.getLogger("LocalSparkRunner")
 if __name__ == "__main__":
     logger.info("Iniciando execução local simplificada do pipeline PySpark...")
     
-    input_path = os.path.join(os.getcwd(), "data", "input", "data.csv")
+    input_path = os.path.join(os.getcwd(), "data", "input", "df_fraud_credit.csv.gz")
     report_path = os.path.join(os.getcwd(), "data", "reports", "dq_report.json")
     output_dir = os.path.join(os.getcwd(), "data", "output")
     

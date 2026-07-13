@@ -7,7 +7,7 @@ def test_transform_risk_score(spark):
         ("SP", 10.0), ("SP", 20.0),
         ("RJ", 5.0)
     ]
-    df = spark.createDataFrame(data, ["location_region", "risk score"])
+    df = spark.createDataFrame(data, ["location_region", "risk_score"])
     
     result_df = transformer.transform_risk_score(df)
     results = result_df.collect()
@@ -29,14 +29,14 @@ def test_transform_top_sales(spark):
         ("addr4", "sale", 150.0, "2023-01-01T10:00:00"),
         ("addr5", "sale", 200.0, "2023-01-01T10:00:00"),
     ]
-    df = spark.createDataFrame(data, ["receiving address", "transaction_type", "amount", "timestamp"])
+    df = spark.createDataFrame(data, ["receiving_address", "transaction_type", "amount", "timestamp"])
     
     result_df = transformer.transform_top_sales(df)
     results = result_df.collect()
     
     assert len(results) == 3
     # Top amounts should be addr1(300), addr5(200), addr4(150)
-    assert results[0]["receiving address"] == "addr1"
+    assert results[0]["receiving_address"] == "addr1"
     assert results[0]["amount"] == 300.0
-    assert results[1]["receiving address"] == "addr5"
-    assert results[2]["receiving address"] == "addr4"
+    assert results[1]["receiving_address"] == "addr5"
+    assert results[2]["receiving_address"] == "addr4"

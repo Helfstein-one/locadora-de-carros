@@ -9,14 +9,14 @@ Nesta versão, a arquitetura foi evoluída para **Big Data**. Todo o motor de pr
 ## 📊 Fontes de Dados e Saídas
 
 ### 📥 A Fonte de Dados (Input)
-O pipeline ingere os dados a partir de um arquivo `CSV` físico e versionado neste repositório em `data/input/data.csv`. 
-As principais colunas são:
-- `timestamp`: A data e hora exata em que a transação ocorreu.
+O pipeline ingere os dados a partir de um arquivo `CSV` compactado físico e versionado neste repositório em `data/input/df_fraud_credit.csv.gz`. O PySpark possui capacidade nativa de leitura de zips.
+As principais colunas utilizadas no processamento são:
+- `timestamp`: A data e hora em epoch que a transação ocorreu.
 - `transaction_type`: A natureza da transação (ex: `sale` para vendas, `rent` para aluguel).
-- `receiving address`: O endereço ou identificador único do recebedor (cliente/agência).
+- `receiving_address`: O endereço ou identificador único do recebedor (cliente/agência).
 - `amount`: O valor financeiro da transação.
 - `location_region`: A região geográfica onde a transação aconteceu (ex: SP, RJ, Norte).
-- `risk score`: Uma pontuação de risco atribuída à transação (numérico).
+- `risk_score`: Uma pontuação de risco atribuída à transação (numérico).
 
 ### 📤 Os Produtos de Dados (Output)
 Os dados são exportados via o método `df.coalesce(1).write.csv()` do Spark para a pasta `data/output/`.

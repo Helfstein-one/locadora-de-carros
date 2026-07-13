@@ -13,7 +13,7 @@ def test_pipeline_integration(spark, tmp_path):
     output_dir = os.path.join(tmp_path, "output")
     
     with open(input_path, "w") as f:
-        f.write("timestamp,transaction_type,receiving address,amount,location_region,risk score\n")
+        f.write("timestamp,transaction_type,receiving_address,amount,location_region,risk_score\n")
         f.write("2023-01-01T10:00:00,sale,addr_1,150.00,SP,10.0\n")
         f.write("2023-01-02T10:00:00,sale,addr_1,200.00,SP,20.0\n")
         f.write("2023-01-03T10:00:00,sale,addr_2,50.00,RJ,5.0\n")
@@ -49,5 +49,5 @@ def test_pipeline_integration(spark, tmp_path):
     df_top = spark.read.csv(os.path.join(output_dir, "top_3_sales_recentes.csv"), header=True, inferSchema=True)
     res_top = df_top.collect()
     assert len(res_top) == 2
-    assert res_top[0]["receiving address"] == "addr_1"
+    assert res_top[0]["receiving_address"] == "addr_1"
     assert res_top[0]["amount"] == 200.0

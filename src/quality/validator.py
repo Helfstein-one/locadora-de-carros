@@ -19,7 +19,7 @@ class PySparkDataQualityValidator(DataQualityInterface):
         # Tipagem
         df = df.withColumn("amount", col("amount").cast("double")) \
                .withColumn("timestamp", col("timestamp").cast("timestamp")) \
-               .withColumn("risk score", col("risk score").cast("double"))
+               .withColumn("risk_score", col("risk_score").cast("double"))
 
         # Checagem de nulos
         null_counts = {}
@@ -32,7 +32,7 @@ class PySparkDataQualityValidator(DataQualityInterface):
             null_counts[c] = int(null_count)
             
         # Dropar registros inválidos nas colunas principais
-        df_clean = df.na.drop(subset=["timestamp", "receiving address", "amount", "transaction_type"])
+        df_clean = df.na.drop(subset=["timestamp", "receiving_address", "amount", "transaction_type"])
         
         total_clean = df_clean.count()
         dropped_records = total_records - total_clean

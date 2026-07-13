@@ -1,59 +1,187 @@
 <mxfile host="app.diagrams.net" version="22.0.0" type="device">
-  <diagram name="Architecture" id="arch-1">
+  <!-- Aba 1: Arquitetura de Contêineres -->
+  <diagram name="Arquitetura de Contêineres" id="arch-1">
     <mxGraphModel dx="1000" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         
         <!-- Docker Environment -->
-        <mxCell id="2" value="Docker Compose Environment" style="swimlane;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;startSize=30;" vertex="1" parent="1">
+        <mxCell id="2" value="Docker Compose Environment" style="swimlane;whiteSpace=wrap;html=1;fillColor=#eef2ff;strokeColor=#4f46e5;strokeWidth=2;fontColor=#1e1b4b;fontStyle=1;startSize=30;rounded=1;arcSize=10;shadow=1;fontFamily=Helvetica;" vertex="1" parent="1">
           <mxGeometry x="60" y="40" width="720" height="460" as="geometry" />
         </mxCell>
-        <mxCell id="docker_icon" value="" style="shape=image;image=https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/docker.svg;verticalLabelPosition=bottom;verticalAlign=top;imageBackground=none;imageBorder=none;" vertex="1" parent="2">
+        <mxCell id="docker_icon" value="" style="shape=image;image=https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg;verticalLabelPosition=bottom;verticalAlign=top;imageBackground=none;imageBorder=none;" vertex="1" parent="2">
           <mxGeometry x="670" y="5" width="24" height="24" as="geometry" />
         </mxCell>
         
         <!-- Airflow Orchestration -->
-        <mxCell id="3" value="Apache Airflow (Orquestrador)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;dashed=1;fontStyle=1;verticalAlign=top;spacingTop=10;" vertex="1" parent="2">
+        <mxCell id="3" value="Apache Airflow (Orquestrador)" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;fillColor=#f5f3ff;strokeColor=#8b5cf6;strokeWidth=2;dashed=1;fontColor=#4c1d95;fontStyle=1;verticalAlign=top;spacingTop=15;fontFamily=Helvetica;" vertex="1" parent="2">
           <mxGeometry x="40" y="70" width="640" height="340" as="geometry" />
         </mxCell>
-        <mxCell id="airflow_icon" value="" style="shape=image;image=https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/apacheairflow.svg;verticalLabelPosition=bottom;verticalAlign=top;imageBackground=none;imageBorder=none;" vertex="1" parent="3">
+        <mxCell id="airflow_icon" value="" style="shape=image;image=https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/apacheairflow/apacheairflow-original.svg;verticalLabelPosition=bottom;verticalAlign=top;imageBackground=none;imageBorder=none;" vertex="1" parent="3">
           <mxGeometry x="590" y="10" width="30" height="30" as="geometry" />
         </mxCell>
         
         <!-- Airflow Webserver -->
-        <mxCell id="4" value="Airflow Webserver&#10;(Porta 8080)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="3">
+        <mxCell id="4" value="Airflow Webserver&#10;(Porta 8080)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#a78bfa;strokeWidth=1.5;fontColor=#4c1d95;fontStyle=0;shadow=1;fontFamily=Helvetica;" vertex="1" parent="3">
           <mxGeometry x="40" y="50" width="140" height="60" as="geometry" />
         </mxCell>
         
         <!-- Airflow Scheduler -->
-        <mxCell id="5" value="Airflow Scheduler&#10;(Dispara a DAG)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="3">
+        <mxCell id="5" value="Airflow Scheduler&#10;(Dispara a DAG)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#a78bfa;strokeWidth=1.5;fontColor=#4c1d95;fontStyle=0;shadow=1;fontFamily=Helvetica;" vertex="1" parent="3">
           <mxGeometry x="220" y="50" width="140" height="60" as="geometry" />
         </mxCell>
         
         <!-- Postgres -->
-        <mxCell id="6" value="Postgres&#10;(Metadados)" style="shape=image;image=https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/postgresql.svg;verticalLabelPosition=bottom;verticalAlign=top;imageBackground=none;imageBorder=none;labelBackgroundColor=none;" vertex="1" parent="3">
+        <mxCell id="6" value="Postgres&#10;(Metadados)" style="shape=image;image=https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/postgresql/postgresql-original.svg;verticalLabelPosition=bottom;verticalAlign=top;imageBackground=none;imageBorder=none;labelBackgroundColor=none;fontColor=#4c1d95;fontStyle=1;fontFamily=Helvetica;" vertex="1" parent="3">
           <mxGeometry x="480" y="40" width="60" height="60" as="geometry" />
         </mxCell>
         
         <!-- Python/PySpark App -->
-        <mxCell id="7" value="PySpark ELT Pipeline&#10;(SOLID: Extractor, Validator, Transformer, Loader)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontStyle=1;verticalAlign=bottom;spacingBottom=15;" vertex="1" parent="3">
+        <mxCell id="7" value="PySpark ELT Pipeline&#10;(SOLID: Extractor, Validator, Transformer, Loader)" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#f59e0b;strokeWidth=2;fontColor=#78350f;fontStyle=1;verticalAlign=bottom;spacingBottom=15;shadow=1;fontFamily=Helvetica;" vertex="1" parent="3">
           <mxGeometry x="100" y="200" width="440" height="100" as="geometry" />
         </mxCell>
-        <mxCell id="spark_icon" value="" style="shape=image;image=https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/apachespark.svg;verticalLabelPosition=bottom;verticalAlign=top;imageBackground=none;imageBorder=none;" vertex="1" parent="7">
+        <mxCell id="spark_icon" value="" style="shape=image;image=https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/apachespark/apachespark-original.svg;verticalLabelPosition=bottom;verticalAlign=top;imageBackground=none;imageBorder=none;" vertex="1" parent="7">
           <mxGeometry x="180" y="20" width="40" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="python_icon" value="" style="shape=image;image=https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/python.svg;verticalLabelPosition=bottom;verticalAlign=top;imageBackground=none;imageBorder=none;" vertex="1" parent="7">
+        <mxCell id="python_icon" value="" style="shape=image;image=https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg;verticalLabelPosition=bottom;verticalAlign=top;imageBackground=none;imageBorder=none;" vertex="1" parent="7">
           <mxGeometry x="240" y="20" width="40" height="40" as="geometry" />
         </mxCell>
         
-        <mxCell id="8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="3" source="5" target="7">
+        <!-- Connections -->
+        <mxCell id="8" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#7c3aed;strokeWidth=2;fontColor=#4c1d95;fontFamily=Helvetica;" edge="1" parent="3" source="5" target="7">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;" edge="1" parent="3" source="4" target="6">
+        <mxCell id="9" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;strokeColor=#8b5cf6;strokeWidth=1.5;fontColor=#4c1d95;fontFamily=Helvetica;" edge="1" parent="3" source="4" target="6">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;" edge="1" parent="3" source="5" target="6">
+        <mxCell id="10" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;strokeColor=#8b5cf6;strokeWidth=1.5;fontColor=#4c1d95;fontFamily=Helvetica;" edge="1" parent="3" source="5" target="6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <!-- Aba 2: Fluxo Funcional (Mermaid) -->
+  <diagram name="Fluxo Funcional" id="func-1">
+    <mxGraphModel dx="1000" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="f_0" />
+        <mxCell id="f_1" parent="f_0" />
+        
+        <!-- Data Sources Container -->
+        <mxCell id="f_2" value="Data Sources" style="swimlane;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;strokeWidth=2;fontColor=#334155;fontStyle=1;startSize=30;rounded=1;arcSize=10;shadow=1;fontFamily=Helvetica;" vertex="1" parent="f_1">
+          <mxGeometry x="220" y="40" width="410" height="130" as="geometry" />
+        </mxCell>
+        <!-- CSV File -->
+        <mxCell id="f_csv" value="Arquivo CSV&#10;'Transações'" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;fillColor=#ffffff;strokeColor=#64748b;strokeWidth=1.5;fontColor=#334155;fontStyle=1;align=center;shadow=1;fontFamily=Helvetica;size=15;" vertex="1" parent="f_2">
+          <mxGeometry x="130" y="45" width="150" height="65" as="geometry" />
+        </mxCell>
+        
+        <!-- Pipeline Distribuído PySpark Container -->
+        <mxCell id="f_3" value="Pipeline Distribuído PySpark" style="swimlane;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#f59e0b;strokeWidth=2;fontColor=#78350f;fontStyle=1;startSize=30;rounded=1;arcSize=10;shadow=1;fontFamily=Helvetica;" vertex="1" parent="f_1">
+          <mxGeometry x="50" y="220" width="750" height="490" as="geometry" />
+        </mxCell>
+        
+        <!-- Extractor -->
+        <mxCell id="f_e" value="Extractor&#10;(Spark Session Read)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#f59e0b;strokeWidth=1.5;fontColor=#78350f;fontStyle=1;shadow=1;fontFamily=Helvetica;" vertex="1" parent="f_3">
+          <mxGeometry x="300" y="50" width="150" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Data Quality / Validator -->
+        <mxCell id="f_q" value="Data Quality&#10;(PySpark Validator)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#f59e0b;strokeWidth=1.5;fontColor=#78350f;fontStyle=1;shadow=1;fontFamily=Helvetica;" vertex="1" parent="f_3">
+          <mxGeometry x="300" y="150" width="150" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- dq_report.json -->
+        <mxCell id="f_r" value="dq_report.json&#10;(Métricas de DQ)" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;fillColor=#fef2f2;strokeColor=#ef4444;strokeWidth=1.5;fontColor=#991b1b;fontStyle=1;align=center;shadow=1;fontFamily=Helvetica;size=15;" vertex="1" parent="f_3">
+          <mxGeometry x="540" y="145" width="160" height="70" as="geometry" />
+        </mxCell>
+        
+        <!-- Transformer Diamond -->
+        <mxCell id="f_t" value="Transformer&#10;(Regras de Negócio)" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff7ed;strokeColor=#ea580c;strokeWidth=1.5;fontColor=#9a3412;fontStyle=1;shadow=1;fontFamily=Helvetica;" vertex="1" parent="f_3">
+          <mxGeometry x="290" y="250" width="170" height="90" as="geometry" />
+        </mxCell>
+        
+        <!-- T1: Cálculo de Risk Score -->
+        <mxCell id="f_t1" value="Cálculo de Risk Score&#10;(Window Functions / Avg)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#f59e0b;strokeWidth=1.5;fontColor=#78350f;fontStyle=0;shadow=1;fontFamily=Helvetica;" vertex="1" parent="f_3">
+          <mxGeometry x="90" y="380" width="220" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- T2: Cálculo Top 3 Sales -->
+        <mxCell id="f_t2" value="Cálculo Top 3 Sales&#10;(Window Functions / Top 3)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#f59e0b;strokeWidth=1.5;fontColor=#78350f;fontStyle=0;shadow=1;fontFamily=Helvetica;" vertex="1" parent="f_3">
+          <mxGeometry x="440" y="380" width="220" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Destino Container -->
+        <mxCell id="f_4" value="Destino" style="swimlane;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#22c55e;strokeWidth=2;fontColor=#14532d;fontStyle=1;startSize=30;rounded=1;arcSize=10;shadow=1;fontFamily=Helvetica;" vertex="1" parent="f_1">
+          <mxGeometry x="50" y="750" width="750" height="300" as="geometry" />
+        </mxCell>
+        
+        <!-- Loader -->
+        <mxCell id="f_l" value="Loader&#10;(Coalesce File)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#22c55e;strokeWidth=1.5;fontColor=#14532d;fontStyle=1;shadow=1;fontFamily=Helvetica;" vertex="1" parent="f_4">
+          <mxGeometry x="300" y="50" width="150" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Output 1: risk_score_por_regiao.csv -->
+        <mxCell id="f_o1" value="risk_score_por_regiao.csv" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;fillColor=#ffffff;strokeColor=#10b981;strokeWidth=1.5;fontColor=#065f46;fontStyle=1;align=center;shadow=1;fontFamily=Helvetica;size=15;" vertex="1" parent="f_4">
+          <mxGeometry x="90" y="180" width="220" height="70" as="geometry" />
+        </mxCell>
+        
+        <!-- Output 2: top_3_sales_recentes.csv -->
+        <mxCell id="f_o2" value="top_3_sales_recentes.csv" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;fillColor=#ffffff;strokeColor=#10b981;strokeWidth=1.5;fontColor=#065f46;fontStyle=1;align=center;shadow=1;fontFamily=Helvetica;size=15;" vertex="1" parent="f_4">
+          <mxGeometry x="440" y="180" width="220" height="70" as="geometry" />
+        </mxCell>
+        
+        <!-- Edges (Transitions) -->
+        
+        <!-- CSV to E -->
+        <mxCell id="f_edge_csv_e" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#64748b;strokeWidth=2;fontFamily=Helvetica;" edge="1" parent="f_1" source="f_csv" target="f_e">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- E to Q -->
+        <mxCell id="f_edge_e_q" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#f59e0b;strokeWidth=2;fontFamily=Helvetica;" edge="1" parent="f_3" source="f_e" target="f_q">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Q to R (Gera Report) -->
+        <mxCell id="f_edge_q_r" value="Gera Report" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#ef4444;strokeWidth=2;dashed=1;fontColor=#b91c1c;labelBackgroundColor=#ffffff;fontFamily=Helvetica;fontStyle=1;" edge="1" parent="f_3" source="f_q" target="f_r">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Q to T (DataFrame Limpo) -->
+        <mxCell id="f_edge_q_t" value="DataFrame Limpo" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#f59e0b;strokeWidth=2;fontColor=#78350f;labelBackgroundColor=#ffffff;fontFamily=Helvetica;fontStyle=1;" edge="1" parent="f_3" source="f_q" target="f_t">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- T to T1 -->
+        <mxCell id="f_edge_t_t1" value="Window Functions / Avg" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#ea580c;strokeWidth=2;fontColor=#9a3412;labelBackgroundColor=#ffffff;fontFamily=Helvetica;fontStyle=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="f_3" source="f_t" target="f_t1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- T to T2 -->
+        <mxCell id="f_edge_t_t2" value="Window Functions / Top 3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#ea580c;strokeWidth=2;fontColor=#9a3412;labelBackgroundColor=#ffffff;fontFamily=Helvetica;fontStyle=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="f_3" source="f_t" target="f_t2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- T1 to L -->
+        <mxCell id="f_edge_t1_l" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#22c55e;strokeWidth=2;fontFamily=Helvetica;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="f_1" source="f_t1" target="f_l">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- T2 to L -->
+        <mxCell id="f_edge_t2_l" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#22c55e;strokeWidth=2;fontFamily=Helvetica;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="f_1" source="f_t2" target="f_l">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- L to O1 -->
+        <mxCell id="f_edge_l_o1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#22c55e;strokeWidth=2;fontFamily=Helvetica;" edge="1" parent="f_4" source="f_l" target="f_o1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- L to O2 -->
+        <mxCell id="f_edge_l_o2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#22c55e;strokeWidth=2;fontFamily=Helvetica;" edge="1" parent="f_4" source="f_l" target="f_o2">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
       </root>

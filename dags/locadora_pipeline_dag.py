@@ -18,7 +18,7 @@ from pyspark.sql import SparkSession
 logger = logging.getLogger(__name__)
 
 def execute_pipeline():
-    input_path = "/opt/airflow/data/input/data.csv"
+    input_path = "/opt/airflow/data/input/df_fraud_credit.csv.gz"
     report_path = "/opt/airflow/data/reports/dq_report.json"
     output_dir = "/opt/airflow/data/output"
     
